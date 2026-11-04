@@ -1,0 +1,4 @@
+{
+  "summary": "Python model file for custom Odoo fields in sale.order and sale.order.line. Implements the Case Price, Unit Price, and Packing info calculations.",
+  "updatedAt": "2026-08-24T12:59:11.070030700Z"
+}

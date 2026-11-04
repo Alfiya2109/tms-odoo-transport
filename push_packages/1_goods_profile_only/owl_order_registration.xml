@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="transport_management_new.OwlOrderRegistration">
+        <div class="o_action_manager o_content" style="background: #faf9f5; overflow-y: auto; height: 100%;">
+            <div class="page" style="width: 100%; padding: 24px 24px 80px; font-family: system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+                
+                <!-- Toast Alert -->
+                <div id="toast" class="toast"></div>
+
+                <!-- Header Actions -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <span style="font-size: 20px; font-weight: 600; color: #1a1a18;">New Booking</span>
+                        <span style="font-size: 11px; background: rgba(0,0,0,0.05); color: #5f5e5a; padding: 3px 9px; border-radius: 8px; font-weight: 500;">Draft</span>
+                        <!-- Priority Stars -->
+                        <div style="display: flex; align-items: center; gap: 4px; margin-left: 8px;">
+                            <span style="font-size: 11px; color: #5f5e5a; font-weight: 500; margin-right: 4px;">Priority:</span>
+                            <span t-on-click="() => this.setPriority('1')" style="cursor: pointer; font-size: 16px;" t-att-style="state.priority >= 1 ? 'color: #f39c12;' : 'color: #ccc;'">
+                                <i class="fa" t-att-class="state.priority >= 1 ? 'fa-star' : 'fa-star-o'"></i>
+                            </span>
+                            <span t-on-click="() => this.setPriority('2')" style="cursor: pointer; font-size: 16px;" t-att-style="state.priority >= 2 ? 'color: #f39c12;' : 'color: #ccc;'">
+                                <i class="fa" t-att-class="state.priority >= 2 ? 'fa-star' : 'fa-star-o'"></i>
+                            </span>
+                            <span t-on-click="() => this.setPriority('3')" style="cursor: pointer; font-size: 16px;" t-att-style="state.priority >= 3 ? 'color: #f39c12;' : 'color: #ccc;'">
+                                <i class="fa" t-att-class="state.priority >= 3 ? 'fa-star' : 'fa-star-o'"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" t-on-click="() => this.onSave('draft')">
+                            <i class="fa fa-floppy-o" style="margin-right: 5px;"></i>Save Draft
+                        </button>
+                        <button class="btn btn-primary btn-sm" t-on-click="() => this.onSave('confirm')" style="background-color: #117a58; border-color: #117a58; color: white;">
+                            <i class="fa fa-check" style="margin-right: 5px;"></i>Save &amp; Confirm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. Customer & Classification Card -->
+                <div class="card" style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px;">
+                    <div class="sechead" style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 500; font-size: 15px; color: #1a1a18;">
+                        <i class="fa fa-user" style="color: #5f5e5a;"></i> Customer &amp; Classification
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                        
+                        <!-- Row 1 -->
+                        <!-- Company -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Company</div>
+                            <t t-if="state.companies.length === 1">
+                                <div style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; display: flex; align-items: center; background-color: #f8f9fa; color: #495057; font-weight: 500;">
+                                    <t t-esc="state.companies[0].name"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <select t-model="state.company_id" t-on-change="onCompanySelectChange" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                    <t t-foreach="state.companies" t-as="comp" t-key="comp.id">
+                                        <option t-att-value="comp.id"><t t-esc="comp.name"/></option>
+                                    </t>
+                                </select>
+                            </t>
+                        </div>
+
+                        <!-- Customer -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Customer</div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select t-model="state.customer_id" t-on-change="onCustomerSelectChange" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                    <option value="">— Select Customer —</option>
+                                    <t t-foreach="state.customers" t-as="c" t-key="c.id">
+                                        <option t-att-value="c.id"><t t-esc="c.name"/></option>
+                                    </t>
+                                    <option value="search_more" style="color: #185fa5; font-weight: 500;">Search More...</option>
+                                </select>
+                                <button class="btn btn-secondary btn-sm" t-on-click="onCreateCustomer" style="height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 10px; background-color: #faf9f5; border: 1px solid rgba(0,0,0,0.15); color: #185fa5;" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Order Contact -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Order Contact</div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select t-model="state.order_contact_id" t-on-change="triggerPreview" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                    <option value="">— Select Contact —</option>
+                                    <t t-foreach="state.contacts" t-as="ct" t-key="ct.id">
+                                        <option t-att-value="ct.id"><t t-esc="ct.name"/></option>
+                                    </t>
+                                </select>
+                                <button class="btn btn-secondary btn-sm" t-on-click="onCreateOrderContact" style="height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 10px; background-color: #faf9f5; border: 1px solid rgba(0,0,0,0.15); color: #185fa5;" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Order Type -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Order type</div>
+                            <select t-model="state.transport_order_type_id" t-on-change="onOrderTypeSelectChange" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                <t t-foreach="state.order_types" t-as="o" t-key="o.id">
+                                    <option t-att-value="o.id"><t t-esc="o.name"/></option>
+                                </t>
+                                <option value="search_more" style="color: #185fa5; font-weight: 500;">Search More...</option>
+                            </select>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <!-- Goods Profile -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Goods Profile</div>
+                            <select t-model="state.goods_profile_id" t-on-change="triggerPreview" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                <t t-foreach="state.goods_profiles" t-as="g" t-key="g.id">
+                                    <option t-att-value="g.id"><t t-esc="g.name"/></option>
+                                </t>
+                            </select>
+                        </div>
+
+                        <!-- Order Reference -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Order reference</div>
+                            <input t-model="state.order_reference" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+
+                        <!-- Invoice Reference -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Invoice Reference</div>
+                            <input t-model="state.invoice_reference" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+
+                        <!-- Waybill Number -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Waybill Number</div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <input t-model="state.consignment_waybill_number" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                                <button class="btn btn-secondary btn-sm" t-on-click="generateWaybillNumber" style="height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 10px; background-color: #faf9f5; border: 1px solid rgba(0,0,0,0.15); color: #117a58;" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <!-- Freight Service -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Freight service</div>
+                            <select t-model="state.freight_service_id" t-on-change="onFreightServiceSelectChange" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                <t t-foreach="state.freight_services" t-as="f" t-key="f.id">
+                                    <option t-att-value="f.id"><t t-esc="f.name"/></option>
+                                </t>
+                                <option value="search_more" style="color: #185fa5; font-weight: 500;">Search More...</option>
+                            </select>
+                        </div>
+
+                        <!-- Project Code -->
+                        <div style="grid-column: span 1;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Project code</div>
+                            <input t-model="state.project_code" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+
+                        <!-- External details (spans 2) -->
+                        <div style="grid-column: span 2;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">External details</div>
+                            <textarea t-model="state.external_details" style="height: 36px; padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; resize: none; font-family: inherit; font-size: 13px;"></textarea>
+                        </div>
+
+                        <!-- Row 4 -->
+                        <!-- Internal details (spans 2) -->
+                        <div style="grid-column: span 2;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Internal details</div>
+                            <textarea t-model="state.internal_details" style="height: 36px; padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; resize: none; font-family: inherit; font-size: 13px;"></textarea>
+                        </div>
+
+                        <!-- Invoicing Instructions (spans 2) -->
+                        <div style="grid-column: span 2;">
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Invoicing Instructions</div>
+                            <textarea t-model="state.invoicing_instructions" style="height: 36px; padding: 8px 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; resize: none; font-family: inherit; font-size: 13px;"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 2. Addresses Card -->
+                <div class="card" style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px;">
+                    <div class="sechead" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; color: #1a1a18;">
+                            <i class="fa fa-map-marker" style="color: #5f5e5a;"></i> Addresses
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <span class="chip" t-att-class="{'on': state.is_successive_carriage}" t-on-click="toggleConsignment" style="font-size: 12px; background: #f4f3ee; color: #5f5e5a; padding: 6px 12px; border-radius: 8px; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(0,0,0,0.05);">
+                                <i class="fa fa-link" t-if="state.is_successive_carriage"></i> Successive Carriage
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Consignment Context Block (Mode B Successive Carriage) -->
+                    <div t-if="state.is_successive_carriage" style="background: #f4f3ee; border: 1px solid #85b7eb; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #185fa5;">
+                                <i class="fa fa-truck"></i> Consignment context — master CMR (CMR 17)
+                            </div>
+                            <span class="muted" style="color: #8a8980; font-size: 11px;">Reference · not priced</span>
+                        </div>
+                        <div style="display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                            <div>
+                                <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Origin <span class="cmr" style="font-size: 10px; background: #e6f1fb; color: #185fa5; padding: 1px 4px; border-radius: 4px; margin-left: 2px;">CMR 4</span></div>
+                                <div style="position: relative;">
+                                    <input placeholder="Search origin address…" t-on-input="(ev) => this.onAddressSearch('consignment_origin', ev.target.value)" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                                    <!-- Search Dropdown -->
+                                    <div t-if="state.activeDdn === 'consignment_origin' &amp;&amp; state.searchResults.length > 0" class="ddn" style="position: absolute; left: 0; right: 0; background: white; z-index: 1000; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto;">
+                                        <t t-foreach="state.searchResults" t-as="p" t-key="p.id">
+                                            <div class="opt" t-on-click="() => this.onPickAddress('consignment_origin', p)" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                                <div style="font-weight: 500; font-size: 13px;"><t t-esc="p.name"/></div>
+                                                <div style="font-size: 11px; color: #8a8980;"><t t-esc="p.street"/>, <t t-esc="p.city"/></div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div t-if="state.consignment_origin_address_id" style="font-size: 12px; margin-top: 5px; color: #185fa5; font-weight: 500;">
+                                    Selected: <t t-esc="state.consignment_origin_name"/> (<t t-esc="state.consignment_origin_city"/>)
+                                    <i class="fa fa-times-circle" t-on-click="() => this.onClearAddress('consignment_origin')" style="cursor: pointer; margin-left: 6px;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Destination <span class="cmr" style="font-size: 10px; background: #e6f1fb; color: #185fa5; padding: 1px 4px; border-radius: 4px; margin-left: 2px;">CMR 3</span></div>
+                                <div style="position: relative;">
+                                    <input placeholder="Search destination address…" t-on-input="(ev) => this.onAddressSearch('consignment_destination', ev.target.value)" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                                    <!-- Search Dropdown -->
+                                    <div t-if="state.activeDdn === 'consignment_destination' &amp;&amp; state.searchResults.length > 0" class="ddn" style="position: absolute; left: 0; right: 0; background: white; z-index: 1000; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto;">
+                                        <t t-foreach="state.searchResults" t-as="p" t-key="p.id">
+                                            <div class="opt" t-on-click="() => this.onPickAddress('consignment_destination', p)" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                                <div style="font-weight: 500; font-size: 13px;"><t t-esc="p.name"/></div>
+                                                <div style="font-size: 11px; color: #8a8980;"><t t-esc="p.street"/>, <t t-esc="p.city"/></div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div t-if="state.consignment_destination_address_id" style="font-size: 12px; margin-top: 5px; color: #185fa5; font-weight: 500;">
+                                    Selected: <t t-esc="state.consignment_destination_name"/> (<t t-esc="state.consignment_destination_city"/>)
+                                    <i class="fa fa-times-circle" t-on-click="() => this.onClearAddress('consignment_destination')" style="cursor: pointer; margin-left: 6px;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Master Waybill No.</div>
+                                <input t-model="state.consignment_waybill_number" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 12px; color: #5f5e5a; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-weight: 500; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <i class="fa fa-money"></i> Priced Undertaking endpoints (Priced leg)
+                        </div>
+                        <button class="btn btn-secondary btn-sm" t-on-click="onSwapAddresses" type="button" style="font-size: 11px; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid rgba(0,0,0,0.15); color: #714B67;" title="Swap Sender and Consignee Address">
+                            <i class="fa fa-exchange" style="font-size: 12px;"></i> Swap Sender &amp; Consignee
+                        </button>
+                    </div>
+                    <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                                  <!-- Sender Card -->
+                        <div style="border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            
+                            <!-- Card Header -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: #1a1a18;">
+                                    <i class="fa fa-building-o" style="color: #714B67;"></i> Sender
+                                    <span class="cmr" style="font-size: 10px; background: #e6f1fb; color: #185fa5; padding: 1px 6px; border-radius: 4px;">CMR 1</span>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <i class="fa fa-search" t-on-click="() => this.openImportAddressModal('sender')" title="Search Address Book" style="cursor: pointer; color: #714B67; font-size: 14px;"></i>
+                                    <i class="fa fa-map-marker" t-on-click="() => this.onSelectLocationOnMap('sender')" title="Select coordinates on Map" style="cursor: pointer; color: #714B67; font-size: 14px;"></i>
+                                    <i class="fa fa-times-circle text-danger" t-if="state.sender_address_id" t-on-click="() => this.onClearAddress('sender')" title="Clear Selected Address" style="cursor: pointer; font-size: 14px;"></i>
+                                </div>
+                            </div>
+
+                            <!-- Search Input Row -->
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <div style="position: relative; flex: 1;">
+                                    <i class="fa fa-search" style="position: absolute; left: 10px; top: 11px; color: #8a8980; font-size: 13px;"></i>
+                                    <input placeholder="Search address book or type name..." t-model="state.sender_name" t-on-input="(ev) => this.onAddressSearch('sender', ev.target.value)" style="height: 36px; padding: 0 10px 0 32px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; font-size: 13px;"/>
+                                    <!-- Autocomplete Dropdown -->
+                                    <div t-if="state.activeDdn === 'sender' &amp;&amp; state.searchResults.length > 0" style="position: absolute; top: 40px; left: 0; right: 0; background: #fff; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.05); z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                        <t t-foreach="state.searchResults" t-as="p" t-key="p.id">
+                                            <div t-on-click="() => this.onPickAddress('sender', p)" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px;">
+                                                <div style="font-weight: 600; color: #185fa5;"><t t-esc="p.name"/></div>
+                                                <div style="font-size: 11px; color: #5f5e5a;"><t t-esc="p.street"/>, <t t-esc="p.city"/></div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" t-on-click="() => state.sender_expanded = !state.sender_expanded" style="height: 36px; width: 36px; border-radius: 8px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #faf9f6; border: 1px solid rgba(0,0,0,0.15); color: #714B67;" type="button" title="Toggle Address Form">
+                                    <i class="fa" t-att-class="state.sender_expanded ? 'fa-minus' : 'fa-plus'"></i>
+                                </button>
+                            </div>
+
+                            <!-- Form View (Expanded) -->
+                            <div t-if="state.sender_expanded" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 12px; margin-top: 4px;">
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Name</div>
+                                    <input t-model="state.sender_name" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Street</div>
+                                    <input t-model="state.sender_street" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Street 2</div>
+                                    <input t-model="state.sender_street_2" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">ZIP</div>
+                                        <input t-model="state.sender_zip" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">City</div>
+                                        <input t-model="state.sender_city" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">State</div>
+                                        <select t-model="state.sender_state_id" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                            <option value="">— State —</option>
+                                            <t t-foreach="state.states" t-as="st" t-key="st.id">
+                                                <option t-att-value="st.id"><t t-esc="st.display_name || st.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Country</div>
+                                    <select t-model="state.sender_country_id" t-on-change="triggerPreview" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                        <option value="">— Country —</option>
+                                        <t t-foreach="state.countries" t-as="co" t-key="co.id">
+                                            <option t-att-value="co.id"><t t-esc="co.display_name || co.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: flex-end;">
+                                    <div style="flex: 1;">
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Latitude</div>
+                                        <input t-model="state.sender_latitude" t-on-change="() => { this.updateMapRoute(); this.triggerPreview(); }" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Longitude</div>
+                                        <input t-model="state.sender_longitude" t-on-change="() => { this.updateMapRoute(); this.triggerPreview(); }" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <button class="btn btn-secondary" t-on-click="() => this.onGeocodeAddress('sender')" style="height: 32px; padding: 0 10px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background-color: #faf9f6; border: 1px solid rgba(0,0,0,0.15);" title="Resolve Coordinates via Address" type="button">
+                                        <i class="fa fa-globe" style="color: #714B67; font-size: 14px;"></i>
+                                    </button>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Phone</div>
+                                        <input t-model="state.sender_phone" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Mobile</div>
+                                        <input t-model="state.sender_mobile" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Email</div>
+                                    <input t-model="state.sender_email" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Contact Person</div>
+                                        <input t-model="state.sender_contact_person" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Contact Phone</div>
+                                        <input t-model="state.sender_contact_phone" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Access Instructions</div>
+                                    <textarea t-model="state.sender_access_instructions" style="height: 48px; font-size: 12px; padding: 6px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%; resize: none; font-family: inherit;"></textarea>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Sender Price Zone</div>
+                                    <select t-model="state.sender_price_zone_id" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                        <option value="">— Select Zone —</option>
+                                        <t t-foreach="state.price_zones" t-as="pz" t-key="pz.id">
+                                            <option t-att-value="pz.id"><t t-esc="pz.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px;">
+                                    <button class="btn btn-secondary btn-sm" t-on-click="() => this.onCreateNewPartner('sender')" type="button" style="font-size: 11px; padding: 4px 10px; border-radius: 6px;">
+                                        <i class="fa fa-id-card-o" style="margin-right: 4px;"></i> Save to Book
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" t-on-click="() => state.sender_expanded = false" type="button" style="background-color: #714B67; border-color: #714B67; font-size: 11px; padding: 4px 10px; border-radius: 6px; color: white;">
+                                        Minimize
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Summary View (Collapsed) -->
+                            <div t-else="" style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; padding: 12px; background: #faf9f6; min-height: 100px; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                                <t t-if="!state.sender_street &amp;&amp; !state.sender_city">
+                                    <div style="text-align: center; color: #8a8980; font-size: 13px; font-weight: 500; cursor: pointer;" t-on-click="() => state.sender_expanded = true">
+                                        <i class="fa fa-home" style="font-size: 24px; color: #ccc; display: block; margin-bottom: 6px;"></i>
+                                        Pick Sender
+                                        <div style="font-size: 10px; color: #a5a49e; font-weight: normal; margin-top: 2px;">Select from Address Book or click '+' to add a new address.</div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+                                        <div style="font-weight: 600; color: #1a1a18; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+                                            <t t-esc="state.sender_name"/>
+                                            <i class="fa fa-pencil" t-on-click="() => state.sender_expanded = true" title="Edit Address Details" style="cursor: pointer; color: #8a8980; font-size: 11px;"></i>
+                                        </div>
+                                        <div style="color: #5f5e5a;"><t t-esc="state.sender_street"/></div>
+                                        <div t-if="state.sender_street_2" style="color: #5f5e5a;"><t t-esc="state.sender_street_2"/></div>
+                                        <div style="color: #5f5e5a;"><t t-esc="state.sender_zip"/> <t t-esc="state.sender_city"/></div>
+                                        
+                                        <!-- Badges/Metadata -->
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 6px;">
+                                            <span t-if="state.sender_latitude" style="background: #e6f1fb; color: #185fa5; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                                                <i class="fa fa-map-marker"></i> <t t-esc="state.sender_latitude"/>, <t t-esc="state.sender_longitude"/>
+                                            </span>
+                                            <span t-if="state.sender_phone || state.sender_mobile" style="background: #f4f3ee; color: #5f5e5a; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" t-att-title="state.sender_phone || state.sender_mobile">
+                                                <i class="fa fa-phone"></i> Contact
+                                            </span>
+                                            <span t-if="state.sender_email" style="background: #f4f3ee; color: #5f5e5a; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" t-att-title="state.sender_email">
+                                                <i class="fa fa-envelope-o"></i> Email
+                                            </span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                            
+                        </div>
+
+                        <!-- Consignee Card -->
+                        <div style="border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            
+                            <!-- Card Header -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: #1a1a18;">
+                                    <i class="fa fa-home" style="color: #714B67;"></i> Consignee
+                                    <span class="cmr" style="font-size: 10px; background: #e6f1fb; color: #185fa5; padding: 1px 6px; border-radius: 4px;">CMR 2</span>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <i class="fa fa-search" t-on-click="() => this.openImportAddressModal('receiver')" title="Search Address Book" style="cursor: pointer; color: #714B67; font-size: 14px;"></i>
+                                    <i class="fa fa-map-marker" t-on-click="() => this.onSelectLocationOnMap('receiver')" title="Select coordinates on Map" style="cursor: pointer; color: #714B67; font-size: 14px;"></i>
+                                    <i class="fa fa-times-circle text-danger" t-if="state.receiver_address_id" t-on-click="() => this.onClearAddress('receiver')" title="Clear Selected Address" style="cursor: pointer; font-size: 14px;"></i>
+                                </div>
+                            </div>
+
+                            <!-- Search Input Row -->
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <div style="position: relative; flex: 1;">
+                                    <i class="fa fa-search" style="position: absolute; left: 10px; top: 11px; color: #8a8980; font-size: 13px;"></i>
+                                    <input placeholder="Search address book or type name..." t-model="state.receiver_name" t-on-input="(ev) => this.onAddressSearch('receiver', ev.target.value)" style="height: 36px; padding: 0 10px 0 32px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%; font-size: 13px;"/>
+                                    <!-- Autocomplete Dropdown -->
+                                    <div t-if="state.activeDdn === 'receiver' &amp;&amp; state.searchResults.length > 0" style="position: absolute; top: 40px; left: 0; right: 0; background: #fff; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.05); z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                        <t t-foreach="state.searchResults" t-as="p" t-key="p.id">
+                                            <div t-on-click="() => this.onPickAddress('receiver', p)" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px;">
+                                                <div style="font-weight: 600; color: #185fa5;"><t t-esc="p.name"/></div>
+                                                <div style="font-size: 11px; color: #5f5e5a;"><t t-esc="p.street"/>, <t t-esc="p.city"/></div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" t-on-click="() => state.receiver_expanded = !state.receiver_expanded" style="height: 36px; width: 36px; border-radius: 8px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #faf9f6; border: 1px solid rgba(0,0,0,0.15); color: #714B67;" type="button" title="Toggle Address Form">
+                                    <i class="fa" t-att-class="state.receiver_expanded ? 'fa-minus' : 'fa-plus'"></i>
+                                </button>
+                            </div>
+
+                            <!-- Form View (Expanded) -->
+                            <div t-if="state.receiver_expanded" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 12px; margin-top: 4px;">
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Name</div>
+                                    <input t-model="state.receiver_name" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Street</div>
+                                    <input t-model="state.receiver_street" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Street 2</div>
+                                    <input t-model="state.receiver_street_2" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">ZIP</div>
+                                        <input t-model="state.receiver_zip" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">City</div>
+                                        <input t-model="state.receiver_city" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">State</div>
+                                        <select t-model="state.receiver_state_id" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                            <option value="">— State —</option>
+                                            <t t-foreach="state.states" t-as="st" t-key="st.id">
+                                                <option t-att-value="st.id"><t t-esc="st.display_name || st.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Country</div>
+                                    <select t-model="state.receiver_country_id" t-on-change="triggerPreview" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                        <option value="">— Country —</option>
+                                        <t t-foreach="state.countries" t-as="co" t-key="co.id">
+                                            <option t-att-value="co.id"><t t-esc="co.display_name || co.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: flex-end;">
+                                    <div style="flex: 1;">
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Latitude</div>
+                                        <input t-model="state.receiver_latitude" t-on-change="() => { this.updateMapRoute(); this.triggerPreview(); }" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Longitude</div>
+                                        <input t-model="state.receiver_longitude" t-on-change="() => { this.updateMapRoute(); this.triggerPreview(); }" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <button class="btn btn-secondary" t-on-click="() => this.onGeocodeAddress('receiver')" style="height: 32px; padding: 0 10px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background-color: #faf9f6; border: 1px solid rgba(0,0,0,0.15);" title="Resolve Coordinates via Address" type="button">
+                                        <i class="fa fa-globe" style="color: #714B67; font-size: 14px;"></i>
+                                    </button>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Phone</div>
+                                        <input t-model="state.receiver_phone" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Mobile</div>
+                                        <input t-model="state.receiver_mobile" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Email</div>
+                                    <input t-model="state.receiver_email" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Contact Person</div>
+                                        <input t-model="state.receiver_contact_person" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                    <div>
+                                        <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Contact Phone</div>
+                                        <input t-model="state.receiver_contact_phone" type="text" style="height: 32px; font-size: 12px; padding: 0 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Access Instructions</div>
+                                    <textarea t-model="state.receiver_access_instructions" style="height: 48px; font-size: 12px; padding: 6px 8px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%; resize: none; font-family: inherit;"></textarea>
+                                </div>
+                                <div>
+                                    <div class="lbl" style="font-size: 10px; color: #5f5e5a; margin-bottom: 2px;">Consignee Price Zone</div>
+                                    <select t-model="state.receiver_price_zone_id" style="height: 32px; font-size: 12px; padding: 0 6px; border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; width: 100%;">
+                                        <option value="">— Select Zone —</option>
+                                        <t t-foreach="state.price_zones" t-as="pz" t-key="pz.id">
+                                            <option t-att-value="pz.id"><t t-esc="pz.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px;">
+                                    <button class="btn btn-secondary btn-sm" t-on-click="() => this.onCreateNewPartner('receiver')" type="button" style="font-size: 11px; padding: 4px 10px; border-radius: 6px;">
+                                        <i class="fa fa-id-card-o" style="margin-right: 4px;"></i> Save to Book
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" t-on-click="() => state.receiver_expanded = false" type="button" style="background-color: #714B67; border-color: #714B67; font-size: 11px; padding: 4px 10px; border-radius: 6px; color: white;">
+                                        Minimize
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Summary View (Collapsed) -->
+                            <div t-else="" style="border: 1px dashed rgba(0,0,0,0.08); border-radius: 8px; padding: 12px; background: #faf9f6; min-height: 100px; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                                <t t-if="!state.receiver_street &amp;&amp; !state.receiver_city">
+                                    <div style="text-align: center; color: #8a8980; font-size: 13px; font-weight: 500; cursor: pointer;" t-on-click="() => state.receiver_expanded = true">
+                                        <i class="fa fa-home" style="font-size: 24px; color: #ccc; display: block; margin-bottom: 6px;"></i>
+                                        Pick Consignee
+                                        <div style="font-size: 10px; color: #a5a49e; font-weight: normal; margin-top: 2px;">Select from Address Book or click '+' to add a new address.</div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+                                        <div style="font-weight: 600; color: #1a1a18; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+                                            <t t-esc="state.receiver_name"/>
+                                            <i class="fa fa-pencil" t-on-click="() => state.receiver_expanded = true" title="Edit Address Details" style="cursor: pointer; color: #8a8980; font-size: 11px;"></i>
+                                        </div>
+                                        <div style="color: #5f5e5a;"><t t-esc="state.receiver_street"/></div>
+                                        <div t-if="state.receiver_street_2" style="color: #5f5e5a;"><t t-esc="state.receiver_street_2"/></div>
+                                        <div style="color: #5f5e5a;"><t t-esc="state.receiver_zip"/> <t t-esc="state.receiver_city"/></div>
+                                        
+                                        <!-- Badges/Metadata -->
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 6px;">
+                                            <span t-if="state.receiver_latitude" style="background: #e6f1fb; color: #185fa5; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                                                <i class="fa fa-map-marker"></i> <t t-esc="state.receiver_latitude"/>, <t t-esc="state.receiver_longitude"/>
+                                            </span>
+                                            <span t-if="state.receiver_phone || state.receiver_mobile" style="background: #f4f3ee; color: #5f5e5a; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" t-att-title="state.receiver_phone || state.receiver_mobile">
+                                                <i class="fa fa-phone"></i> Contact
+                                            </span>
+                                            <span t-if="state.receiver_email" style="background: #f4f3ee; color: #5f5e5a; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" t-att-title="state.receiver_email">
+                                                <i class="fa fa-envelope-o"></i> Email
+                                            </span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Transport & Schedule Card -->
+                <div class="card" style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px;">
+                    <div class="sechead" style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 500; font-size: 15px; color: #1a1a18;">
+                        <i class="fa fa-clock-o" style="color: #5f5e5a;"></i> Transport &amp; Schedule
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Pickup Date *</div>
+                            <input t-model="state.pick_up_date" t-on-change="triggerPreview" type="date" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Pickup Time Window</div>
+                            <input t-model="state.pick_up_time_window" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Delivery Date *</div>
+                            <input t-model="state.delivery_date" t-on-change="triggerPreview" type="date" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Delivery Time Window</div>
+                            <input t-model="state.delivery_time_window" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Incoterm</div>
+                            <select t-model="state.incoterm_id" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;">
+                                <option value="">— Select —</option>
+                                <t t-foreach="state.incoterms" t-as="inc" t-key="inc.id">
+                                    <option t-att-value="inc.id"><t t-esc="inc.code"/> - <t t-esc="inc.name"/></option>
+                                </t>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="lbl" style="font-size: 11px; color: #5f5e5a; margin-bottom: 4px; font-weight: 500;">Incoterm Location</div>
+                            <input t-model="state.incoterm_location" type="text" style="height: 36px; padding: 0 10px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; width: 100%;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Route & Freight Legs Card -->
+                <div class="card" style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px;">
+                    <div class="sechead" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; color: #1a1a18;">
+                            <i class="fa fa-map" style="color: #5f5e5a;"></i> Route &amp; Freight Legs
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="seg" style="display: flex; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden; font-size: 12px;">
+                                <span t-att-class="{'on': state.planning_type === 'direct'}" t-on-click="() => { state.planning_type = 'direct'; this.triggerPreview(); }" style="padding: 6px 12px; cursor: pointer; color: #5f5e5a; background: #fff;" class="seg-item">Direct</span>
+                                <span t-att-class="{'on': state.planning_type === 'hub'}" t-on-click="() => { state.planning_type = 'hub'; this.triggerPreview(); }" style="padding: 6px 12px; cursor: pointer; color: #5f5e5a; background: #fff;" class="seg-item">Hub-based</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div style="position: relative; background: #f4f3ee; border-radius: 8px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(0,0,0,0.08);">
+                        <div t-ref="mapContainer" style="height: 160px; width: 100%;"></div>
+                        <div t-if="state.map_picking_mode" style="position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000; background: #e0f2fe; border: 1px solid #0369a1; color: #0369a1; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 500; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                            <span>📍 Picking coordinates for <strong t-esc="state.map_picking_mode"/> - click on map</span>
+                            <button t-on-click="() => state.map_picking_mode = null" class="btn btn-sm btn-link p-0 text-danger" style="font-weight: bold; text-decoration: none; font-size: 11px;">Cancel</button>
+                        </div>
+                        <div style="position: absolute; bottom: 8px; left: 12px; font-size: 11px; color: #8a8980; z-index: 999; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px;">
+                            Indicative route — final route set in run planning
+                        </div>
+                    </div>
+
+                    <!-- Generated Legs List -->
+                    <div style="font-size: 12px; font-weight: 600; color: #5f5e5a; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Legs breakdown</span>
+                        <button class="btn btn-secondary btn-sm" t-on-click="onGenerateLegs" type="button" style="font-size: 11px; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid rgba(0,0,0,0.15); color: #714B67; line-height: 1;" title="Generate/Refresh Route Legs">
+                            <i class="fa fa-refresh" style="font-size: 10px;"></i> Generate Legs
+                        </button>
+                    </div>
+                    <div t-if="state.legs.length === 0" style="padding: 12px 0;">
+                        <t t-if="state.preview_error">
+                            <div style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4;">
+                                <i class="fa fa-exclamation-circle" style="margin-top: 3px; font-size: 14px;"></i>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 2px;">Legs Generation Failed:</strong>
+                                    <t t-esc="state.preview_error"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div style="font-size: 13px; color: #8a8980;">
+                                No legs yet. Please select addresses and products to generate.
+                            </div>
+                        </t>
+                    </div>
+                    <div t-else="" style="display: flex; flex-direction: column; gap: 8px;">
+                        <t t-foreach="state.legs" t-as="l" t-key="l_index">
+                            <div style="border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; padding: 10px 14px; background: #faf9f5; display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #e6f1fb; color: #185fa5; font-size: 10px; font-weight: 600;">
+                                        <t t-esc="l.sequence"/>
+                                    </span>
+                                    <span class="badge info" style="font-size: 10px; background: #e6f1fb; color: #185fa5; padding: 2px 6px; border-radius: 6px; font-weight: 600;"><t t-esc="l.type"/></span>
+                                    <span style="font-weight: 500;"><t t-esc="l.from"/> <i class="fa fa-long-arrow-right" style="color: #8a8980;"></i> <t t-esc="l.to"/></span>
+                                </div>
+                                <div style="font-size: 13px; font-weight: 600; color: #1a1a18;">
+                                    <t t-esc="l.carrier"/> · <t t-esc="l.cost"/> EUR
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Margin Row -->
+                    <div t-if="state.legs.length > 0" style="display: flex; align-items: center; justify-content: space-between; background: #f4f3ee; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 10px; border: 1px solid rgba(0,0,0,0.04);">
+                        <span style="color: #5f5e5a; font-weight: 500;">
+                            Revenue: <t t-esc="state.margin_revenue"/> EUR · Leg Cost: <t t-esc="state.margin_cost"/> EUR
+                        </span>
+                        <span style="font-weight: 600; color: #1a1a18;">
+                            Margin: <span style="color: #0f6e56;"><t t-esc="state.margin_amount"/> EUR (<t t-esc="state.margin_percent.toFixed(1)"/>%)</span>
+                        </span>
+                    </div>
+
+
+                </div>

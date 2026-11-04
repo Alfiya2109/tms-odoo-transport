@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Sales Order Form View -->
+    <record id="view_order_form_inherit_b2b" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.b2b</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- 1. Add PO Number Field to the Header section -->
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="x_po_number" placeholder="Enter Customer PO#"/>
+            </xpath>
+
+            <!-- 2. Add Item No. (Sequence) and Item Number (SKU) before Product Name -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="before">
+                <field name="x_line_sequence" readonly="1" force_save="1"/>
+                <field name="x_product_sku" optional="show"/>
+            </xpath>
+
+            <!-- 3. Hide the standard product_packaging_qty (Packaging Qty) column to reduce clutter -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_qty']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- 4. Customize standard product_packaging_id to be labeled 'Packing' in-place -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_id']" position="attributes">
+                <attribute name="string">Packing</attribute>
+                <attribute name="placeholder">Select Packing</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+
+            <!-- 5. Insert Custom Case Price Column right after the customized Packing column -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_id']" position="after">
+                <field name="x_case_price" widget="monetary" optional="show"/>
+            </xpath>
+
+            <!-- 6. Hide Line-level Taxes column -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='tax_id']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

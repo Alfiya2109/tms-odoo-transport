@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Odoo
+*.pyc
+odoo_sessions/
+*.log
+
+# Large binary zips
+mobile_stack/ant.zip
+mobile_stack/tomcat.zip
+mobile_stack/apache-ant-1.10.14/
+mobile_stack/apache-tomcat-10.1.18/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite3
+*.db
+
+# Misc
+false

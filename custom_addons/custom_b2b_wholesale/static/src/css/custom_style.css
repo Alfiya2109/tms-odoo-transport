@@ -1,0 +1,42 @@
+/* Custom CSS for B2B Wholesale - Curated Flavours */
+
+/* Clean up the form view notebook area to look like a modern card */
+.o_form_view .o_notebook {
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
+    padding: 12px !important;
+    margin-top: 15px !important;
+}
+
+/* Style for input fields inside the table */
+.o_selected_row input {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+}
+
+/* Clean up headers - no flashy colors, just elegant professional fonts */
+.o_list_table th {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    background-color: #f8fafc !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+/* Style the PO Number field input */
+[name="x_po_number"] input {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    transition: border-color 0.2s;
+}
+
+[name="x_po_number"] input:focus {
+    border-color: #6366f1 !important;
+    outline: none !important;
+}

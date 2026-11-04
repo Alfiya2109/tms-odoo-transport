@@ -1,0 +1,3 @@
+@echo off
+echo Resetting MySQL Database for API Gateway...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0reset_mysql.ps1"

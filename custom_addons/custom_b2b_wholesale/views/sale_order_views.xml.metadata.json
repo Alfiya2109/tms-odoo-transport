@@ -1,0 +1,4 @@
+{
+  "summary": "XML views file inheriting Odoo standard sales order form. Adds PO Number, injects custom line columns (Packing, Case/Unit Price), and hides line taxes.",
+  "updatedAt": "2026-08-24T12:59:22.178746800Z"
+}
