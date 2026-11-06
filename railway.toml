@@ -1,0 +1,11 @@
+# Railway Deployment Config
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "odoo --config=/etc/odoo/odoo.conf"
+healthcheckPath = "/web/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
