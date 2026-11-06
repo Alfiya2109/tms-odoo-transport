@@ -6,9 +6,8 @@
 
 ---
 
-## 🌐 Live Showcase
-🔗 **[View Project Showcase →](https://tms-showcase.vercel.app)**  
-📧 Contact: [alfiyakhan0921@gmail.com](mailto:alfiyakhan0921@gmail.com) | 💬 [WhatsApp](https://wa.me/917208048534)
+## 📬 Contact
+📧 [alfiyakhan0921@gmail.com](mailto:alfiyakhan0921@gmail.com) | 💬 [WhatsApp](https://wa.me/917208048534)
 
 ---
 
